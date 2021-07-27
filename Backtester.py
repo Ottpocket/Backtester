@@ -186,8 +186,12 @@ class Strategy:
         '''
         buy_dict = {} #{stonk: bought_price}
 
-        #Buy the stonk if >.8 preds and low <= yesterday close close of yesterday
-        msk = (daily_df['preds'] >= .8) & (daily_df['low'] <= daily_df[self.yesterday_close]) & (daily_df['open'] != 0)
+ 
+        #Buy the stonk if >.8 preds, low <= yesterday close close of yesterday,
+        # and the stonk is among top1= 10 best predicted of day
+        eleventh_best = daily_df['preds'].sort_values(ascending=False).reset_index(drop=True)[10]
+        msk = (daily_df['preds'] >= .8) & (daily_df['low'] <= daily_df[self.yesterday_close]) &\
+            (daily_df['open'] != 0) & (daily_df['preds'] > eleventh_best)
         for ticker, open_, yesterday_close in daily_df.loc[msk, ['ticker', 'open', self.yesterday_close]].values.tolist():
             if open_ < yesterday_close:
                 buy_price = open_
