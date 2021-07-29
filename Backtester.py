@@ -186,7 +186,7 @@ class Strategy:
         '''
         buy_dict = {} #{stonk: bought_price}
 
- 
+
         #Buy the stonk if >.8 preds, low <= yesterday close close of yesterday,
         # and the stonk is among top1= 10 best predicted of day
         eleventh_best = daily_df['preds'].sort_values(ascending=False).reset_index(drop=True)[10]
@@ -272,6 +272,28 @@ class Daily_Mover():
             self.strategy_names.append(strat.name)
         self.strategy_names = list(set(self.strategy_names))
 
+def get_portfolio_growth_std(self, end, start='2018-01-01'):
+    '''
+    Gives mean and std for portfolio growth accross all n runs
+    of model.  
+    '''
+    portfolio_dict = {}
+    for i in range(len(self.strategies)):
+        name = self.strategies[i].name
+
+        if name not in portfolio_dict.keys():
+            portfolio_dict[name] = []
+
+        df = pd.DataFrame(self.strategies[i].growth_chart)
+        first = df.loc[df['day']==start, 'portfolio_and_account'].values[0]
+        last = df.loc[df['day']==end, 'portfolio_and_account'].values[0]
+        portfolio_dict[name].append(last / first)
+
+    stat_dict = {}
+    for key in portfolio_dict.keys():
+        stat_dict[key] = {'mean':np.mean(portfolio_dict[key]),
+                              'std':np.std(portfolio_dict[key])}
+    return stat_dict
 
     def get_average_portfolio(self):
         '''
